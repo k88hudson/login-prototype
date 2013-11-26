@@ -11,30 +11,30 @@ define(['eventEmitter/EventEmitter'], function(EventEmitter) {
       console.error('Looks like navigator.id does not exist. Did you include https://login.persona.org/include.js?');
     }
 
-    self.email = options.email;
+    self.email = options.email || '';
     self.loginRoute = options.loginRoute || '/verify';
     self.logoutRoute = options.logoutRoute || '/logout';
 
     // Set up watch methods
     navigator.id.watch({
-      loggedInUser: self.email,
-      onlogin: function(assertion, email) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', self.loginRoute, true);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        //xhr.setRequestHeader('X-CSRF-Token', _csrf);
-        xhr.addEventListener('loadend', function(e) {
-          var data = JSON.parse(this.responseText);
-          console.log(data);
-          if (data && data.status === 'okay') {
-            ee.emitEvent('login', [assertion]);
-          }
-        }, false);
+      loggedInUser: options.email,
+      onlogin: function(assertion) {
+        // var xhr = new XMLHttpRequest();
+        // xhr.open('POST', self.loginRoute, true);
+        // xhr.setRequestHeader('Content-Type', 'application/json');
+        // //xhr.setRequestHeader('X-CSRF-Token', _csrf);
+        // xhr.addEventListener('loadend', function(e) {
+        //   var data = JSON.parse(this.responseText);
+        //   console.log(data);
+        //   if (data && data.status === 'okay') {
+        //     ee.emitEvent('login', [assertion]);
+        //   }
+        // }, false);
 
-        xhr.send(JSON.stringify({
-          assertion: assertion
-        }));
-        // ee.emitEvent('login', [assertion]);
+        // xhr.send(JSON.stringify({
+        //   assertion: assertion
+        // }));
+        ee.emitEvent('login', [assertion]);
       },
       onlogout: function() {
         // var xhr = new XMLHttpRequest();
@@ -52,9 +52,12 @@ define(['eventEmitter/EventEmitter'], function(EventEmitter) {
     self.login = function() {
       ee.emitEvent('progress');
       navigator.id.request({
-        oncancel: ee.emitEvent('error', [{
-          error: 'The user canceled the request.'
-        }])
+        oncancel: function() {
+          console.log('cancel');
+          ee.emitEvent('error', [{
+            error: 'The user canceled the request.'
+          }]);
+        }
       });
     };
 

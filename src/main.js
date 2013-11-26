@@ -32,8 +32,8 @@ require([
     console.log('in progress...');
   });
 
-  persona.on('login', function(assert) {
-    console.log(assert);
+  persona.on('login', function(email) {
+    console.log(email);
   });
 
   persona.on('logout', function() {
